@@ -1,19 +1,38 @@
 {
-  "name": "unplugin-starter",
+  "name": "unplugin-class-extractor",
   "type": "module",
   "version": "0.0.1",
   "packageManager": "pnpm@7.33.7",
-  "description": "",
+  "description": "A powerful unplugin for extracting class and className attributes from specified file types, generating a new string for Tailwind CSS style extraction.",
   "author": "Simon He",
   "license": "MIT",
   "funding": "https://github.com/sponsors/Simon-He95",
-  "homepage": "https://github.com/Simon-He95/unplugin-starter#readme",
+  "homepage": "https://github.com/Simon-He95/unplugin-class-extractor#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Simon-He95/unplugin-starter.git"
+    "url": "git+https://github.com/Simon-He95/unplugin-class-extractor.git"
   },
-  "bugs": "https://github.com/Simon-He95/unplugin-starter/issues",
-  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/Simon-He95/unplugin-class-extractor/issues",
+    "email": "support@example.com"
+  },
+  "keywords": [
+    "unplugin",
+    "class-extractor",
+    "tailwindcss",
+    "plugin",
+    "build-tool",
+    "vite",
+    "webpack",
+    "rollup",
+    "esbuild",
+    "rspack",
+    "nuxt",
+    "astro",
+    "css",
+    "className",
+    "automation"
+  ],
   "sideEffects": false,
   "exports": {
     ".": {
