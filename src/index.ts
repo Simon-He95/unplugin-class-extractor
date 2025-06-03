@@ -17,9 +17,15 @@ export const unpluginFactory: UnpluginFactory<Options> = (options) => {
   return {
     name: PLUGIN_NAME,
     transformInclude(id) {
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`[${PLUGIN_NAME}] Development mode detected, transformInclude for ${id}`)
+      }
       return filter(id)
     },
-    transform(code) {
+    transform(code, id) {
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`[${PLUGIN_NAME}] Development mode detected, transform for ${id}`)
+      }
       return extractor(code)
     },
     writeBundle() {
@@ -29,11 +35,12 @@ export const unpluginFactory: UnpluginFactory<Options> = (options) => {
           throw new Error('Output path must be a non-empty string')
         }
         const resolvedPath = path.resolve(process.cwd(), output) // 将相对路径解析为绝对路径
-        const content = Array.from(extractorCode).join('\n')
+        const content = `export default \`${Array.from(extractorCode).join(' ')}\`;` // 拼接成 export default 字符串
         try {
-          fs.writeFileSync(resolvedPath, content, 'utf-8')
-          // eslint-disable-next-line no-console
-          console.log(`Extracted class names written to ${resolvedPath}`)
+          fs.writeFileSync(resolvedPath, content, 'utf-8') // 写入文件
+          if (process.env.NODE_ENV === 'development')
+            // eslint-disable-next-line no-console
+            console.log(`Extracted class names written to ${resolvedPath}`)
         }
         catch (error) {
           console.error(`Failed to write extracted class names to ${resolvedPath}:`, error)
