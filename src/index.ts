@@ -16,16 +16,13 @@ export const unpluginFactory: UnpluginFactory<Options> = (options) => {
   })
   return {
     name: PLUGIN_NAME,
+    apply: 'build', // 只在构建时应用
+    enforce: 'post', // 确保在所有转换之后执行
     transformInclude(id) {
-      if (process.env.NODE_ENV === 'development') {
-        console.warn(`[${PLUGIN_NAME}] Development mode detected, transformInclude for ${id}`)
-      }
       return filter(id)
     },
     transform(code, id) {
-      if (process.env.NODE_ENV === 'development') {
-        console.warn(`[${PLUGIN_NAME}] Development mode detected, transform for ${id}`)
-      }
+      console.warn(`[${PLUGIN_NAME}] Development mode detected, transform for ${id}`)
       return extractor(code)
     },
     writeBundle() {
@@ -38,9 +35,8 @@ export const unpluginFactory: UnpluginFactory<Options> = (options) => {
         const content = `export default \`${Array.from(extractorCode).join(' ')}\`;` // 拼接成 export default 字符串
         try {
           fs.writeFileSync(resolvedPath, content, 'utf-8') // 写入文件
-          if (process.env.NODE_ENV === 'development')
-            // eslint-disable-next-line no-console
-            console.log(`Extracted class names written to ${resolvedPath}`)
+          // eslint-disable-next-line no-console
+          console.log(`Extracted class names written to ${resolvedPath}`)
         }
         catch (error) {
           console.error(`Failed to write extracted class names to ${resolvedPath}:`, error)
@@ -55,7 +51,7 @@ export const unpluginFactory: UnpluginFactory<Options> = (options) => {
 
   function extractor(code: string) {
     // 用正则提取出 class 和 className，然后记录，最后一起输出到 output 地址
-    code.replace(/class(?:Name)?\s*=\s*['"]([\s\S]*?)['"]/g, (match, className) => {
+    code.replace(/class(?:Name)?\s*[:=]\s*['"]([\s\S]*?)['"]/g, (match, className) => {
       className.split(/\s+/).forEach((name: string) => {
         if (name) {
           extractorCode.add(name)
