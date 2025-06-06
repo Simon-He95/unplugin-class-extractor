@@ -12,7 +12,7 @@ export const unpluginFactory: UnpluginFactory<Options> = (options) => {
   const filter = createFilter(options.include, options.exclude)
   extractorCode.clear()
   options.safeList?.forEach((className) => {
-    extractorCode.add(className)
+    className.split(/\s+/g).map(extractorCode.add)
   })
   return {
     name: PLUGIN_NAME,
