@@ -140,13 +140,13 @@
     "unplugin": "^1.16.1"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^2.27.3",
+    "@antfu/eslint-config": "^4.14.1",
     "@nuxt/kit": "^3.17.4",
     "@nuxt/schema": "^3.17.4",
     "@rollup/pluginutils": "^5.1.4",
     "@types/node": "^18.19.110",
     "bumpp": "^8.2.1",
-    "eslint": "^8.57.1",
+    "eslint": "^9.28.0",
     "esno": "^0.16.3",
     "fast-glob": "^3.3.3",
     "lint-staged": "^13.3.0",

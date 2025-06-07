@@ -1,10 +1,10 @@
+import type { UnpluginFactory } from 'unplugin'
+import type { Options } from './types'
 import fs from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
-import type { UnpluginFactory } from 'unplugin'
-import { createUnplugin } from 'unplugin'
 import { createFilter } from '@rollup/pluginutils'
-import type { Options } from './types'
+import { createUnplugin } from 'unplugin'
 import { PLUGIN_NAME } from './constant'
 
 const extractorCode = new Set<string>()

@@ -1,5 +1,5 @@
-import { basename, dirname, resolve } from 'node:path'
 import { promises as fs } from 'node:fs'
+import { basename, dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import fg from 'fast-glob'
 import pc from 'picocolors'
