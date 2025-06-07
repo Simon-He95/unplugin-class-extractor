@@ -51,7 +51,7 @@ export const unpluginFactory: UnpluginFactory<Options> = (options) => {
 
   function extractor(code: string) {
     // 用正则提取出 class 和 className，然后记录，最后一起输出到 output 地址
-    code.replace(/\s*([\]\[])\s*/g,'$1').replace(/class(?:Name)?\s*[:=]\s*(.*)/g, (match, className) => {
+    code.replace(/\s*([\][])\s*/g, '$1').replace(/class(?:Name)?\s*[:=]\s*(.*)/g, (match, className) => {
       // className 提取 ""之间的内容
       className.replace(/"([^"]*)"/g, (_: string, classValue: string) => {
         classValue.split(/\s+/).forEach((name: string) => {
