@@ -2,6 +2,36 @@
 
 一个基于 [unplugin](https://github.com/unplugin/unplugin) 的插件，用于解析指定文件类型，自动提取 `class` 和 `className` 属性，并将其拼接成一个新的字符串，供 TailwindCSS 或 UnoCSS 等工具进行样式提取。
 
+## 背景
+
+在开发基于 Tailwind CSS 或 UnoCSS 的 UI 组件库时，开发者通常面临一个两难的选择：
+
+### 选择一：打包原子化 CSS 结果
+- **优势**：使用者可以直接使用预编译的样式，无需额外配置
+- **问题**：
+  - 预编译的 CSS 与使用者项目中的原子化 CSS 无法复用和合并
+  - 会产生样式冗余，增加最终包体积
+  - 失去了原子化 CSS 按需生成的核心优势
+
+### 选择二：不打包 CSS，通过 content 扫描源码
+- **优势**：保持原子化 CSS 的按需生成特性，样式可以完全复用
+- **问题**：
+  - 需要在 `tailwind.config.js` 或 UnoCSS 配置中添加组件库源码路径到 `content` 数组
+  - 扫描大量源码文件会显著增加构建时间
+  - 开发环境的热更新性能会受到严重影响
+  - 随着组件库规模增长，性能问题会愈发严重
+
+### 我们的解决方案
+
+`unplugin-class-extractor` 提供了第三种方案：**预提取 + 按需生成**
+
+- 在组件库构建时，提前扫描并提取所有用到的类名
+- 将提取结果输出为轻量级的文本文件
+- 使用者只需将这个文本文件加入到 `content` 配置中
+- 既保持了原子化 CSS 的按需生成特性，又避免了扫描大量源码文件的性能开销
+
+这种方案完美平衡了性能与功能，让 UI 组件库的开发者和使用者都能享受到最佳的开发体验。
+
 ## 特性
 
 - 支持多种构建工具（Vite、Webpack、Rollup、esbuild、Rspack、Nuxt、Astro 等）
@@ -111,28 +141,48 @@ export default defineNuxtConfig({
 -   **避免遗漏**：确保所有动态拼接或条件渲染的类名也能被有效捕获（如果它们以静态字符串形式存在于提取目标中）。
 -   **生成聚合文件**：将所有提取到的类名输出到一个单一的文件（如 `extracted-classes.txt`）。你可以将这个文件加入到 Tailwind CSS 或 UnoCSS 的 `content` 配置中。在某些情况下，特别是对于大型或复杂项目，扫描这个聚合文件可能比扫描大量原始源文件更快。
 
-### 2. 优化外部 UI 组件库与宿主项目的集成
+### 2. 解决 UI 组件库的原子化 CSS 困境
 
-当你开发一个独立的 UI 组件库（例如使用 Vue、React 或 Web Components，并采用 Tailwind CSS 或 UnoCSS 进行样式设计），并希望在其他项目中使用这个库时，通常会遇到以下挑战：
+这是本插件最重要的应用场景。当你开发一个基于 Tailwind CSS 或 UnoCSS 的 UI 组件库时，你会面临前面提到的两难选择。
 
--   **样式处理策略**：为了确保最终项目中样式的统一性和避免 CSS 重复，组件库本身不应预先编译其 Tailwind/UnoCSS 类。相反，这些类应当由使用该库的宿主项目中的 Tailwind/UnoCSS 引擎来扫描和生成。
--   **扫描性能瓶颈**：如果组件库包含大量文件，宿主项目在其 `tailwind.config.js` (或 UnoCSS 配置文件) 的 `content` 数组中直接包含组件库的整个源码路径 (例如 `node_modules/my-ui-lib/src/**/*.{vue,js,ts,jsx,tsx}`)，可能会导致宿主项目的构建过程和开发时的热模块替换 (HMR) 速度显著下降。
+**传统做法的问题：**
+- 如果将 CSS 打包到组件库中，使用者项目中的原子化 CSS 无法与组件库的 CSS 进行复用和合并
+- 如果不打包 CSS，要求使用者在 `content` 中配置组件库源码路径（如 `node_modules/your-ui-lib/src/**/*.{vue,js,ts,jsx,tsx}`），会导致构建和开发时的性能问题
 
-**`unplugin-class-extractor` 如何提供帮助：**
-
-此插件为上述场景提供了一个高效的解决方案：
+**`unplugin-class-extractor` 的解决方案：**
 
 1.  **在你的 UI 组件库项目中**：
-    *   在构建组件库的流程中配置并使用 `unplugin-class-extractor`。
-    *   插件会扫描你组件库中所有指定类型的文件，提取出所有用到的 `class` 和 `className` 字符串。
-    *   这些提取出的类名会被写入到一个单一的输出文件（例如，配置 `output: 'dist/styles/extracted-classes.txt'`）。
-    *   当你发布你的组件库时，将这个生成的 `extracted-classes.txt` 文件一同发布（例如，将其包含在 npm 包的 `files` 数组中）。
+    ```ts
+    // 在构建配置中使用插件
+    classExtractor({
+      include: ['src/**/*.{vue,jsx,tsx}'],
+      output: 'dist/extracted-classes.txt',
+    })
+    ```
+    
+    插件会扫描你组件库中所有指定类型的文件，提取出所有用到的 `class` 和 `className` 字符串，并将结果写入 `dist/extracted-classes.txt` 文件。
 
 2.  **在宿主项目中（即使用你的 UI 组件库的项目）**：
-    *   在其 `tailwind.config.js` (或等效的 UnoCSS 配置文件) 的 `content` 配置中，不再指向组件库的庞大源码目录。
-    *   而是指向组件库发布包中那个预先提取好的类名文件，例如：`'./node_modules/your-component-library/dist/styles/extracted-classes.txt'`。
+    ```js
+    // tailwind.config.js
+    module.exports = {
+      content: [
+        './src/**/*.{js,ts,jsx,tsx,vue}',
+        // 不再需要扫描整个组件库源码，只需要包含预提取的类名文件
+        './node_modules/your-ui-lib/dist/extracted-classes.txt'
+      ],
+      // ...
+    }
+    ```
 
-通过这种方式，宿主项目的 Tailwind/UnoCSS 引擎只需扫描一个轻量级的、仅包含纯类名列表的文本文件，而不是遍历组件库的全部源文件。这极大地减少了需要分析的内容，从而显著提升了宿主项目的构建速度和开发服务器的启动/热更新性能，同时确保了组件库中所有必需的原子化 CSS 类都能被宿主项目正确识别和生成。
+**带来的好处：**
+- ✅ **性能优化**：宿主项目只需要扫描一个轻量级的文本文件，而不是遍历组件库的全部源文件
+- ✅ **开发体验**：显著提升构建速度和开发服务器的启动/热更新性能
+- ✅ **样式复用**：保持原子化 CSS 的按需生成特性，确保样式可以完全复用
+- ✅ **零冗余**：避免了预编译 CSS 带来的样式冗余问题
+- ✅ **易于维护**：组件库开发者无需为样式打包策略烦恼，使用者也无需复杂的配置
+
+这种方式既解决了性能问题，又保持了原子化 CSS 的核心优势，为 UI 组件库的开发和使用提供了最佳实践。
 
 ## License
 
