@@ -5,11 +5,12 @@ import path from 'node:path'
 import process from 'node:process'
 import { createFilter } from '@rollup/pluginutils'
 import { createUnplugin } from 'unplugin'
-import { PLUGIN_NAME } from './constant'
+import { extractorCode, PLUGIN_NAME } from './constant'
+import { extractor, extractorAll } from './utils'
 
-const extractorCode = new Set<string>()
 export const unpluginFactory: UnpluginFactory<Options> = (options) => {
   const filter = createFilter(options.include, options.exclude)
+  const fullScanFilesfilter = createFilter(options.fullScanFiles)
   extractorCode.clear()
   options.safeList?.forEach((className) => {
     className.split(/\s+/g).forEach(name => extractorCode.add(name))
@@ -23,7 +24,7 @@ export const unpluginFactory: UnpluginFactory<Options> = (options) => {
     },
     transform(code, id) {
       console.warn(`[${PLUGIN_NAME}] Development mode detected, transform for ${id}`)
-      return extractor(code)
+      return fullScanFilesfilter(id) ? extractorAll(code) : extractor(code)
     },
     writeBundle() {
       if (extractorCode.size > 0) {
@@ -47,23 +48,6 @@ export const unpluginFactory: UnpluginFactory<Options> = (options) => {
         console.log('No class names extracted.')
       }
     },
-  }
-
-  function extractor(code: string) {
-    // 用正则提取出 class 和 className，然后记录，最后一起输出到 output 地址
-    code.replace(/\s*([\][])\s*/g, '$1').replace(/class(?:Name)?\s*[:=]\s*(.*)/g, (match, className) => {
-      // className 提取 ""之间的内容
-      className.replace(/"([^"]*)"/g, (_: string, classValue: string) => {
-        classValue.split(/\s+/).forEach((name: string) => {
-          if (name) {
-            extractorCode.add(name)
-          }
-        })
-      })
-
-      return match
-    })
-    return code
   }
 }
 
