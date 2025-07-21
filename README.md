@@ -159,7 +159,7 @@ export default defineNuxtConfig({
       output: 'dist/extracted-classes.txt',
     })
     ```
-    
+
     插件会扫描你组件库中所有指定类型的文件，提取出所有用到的 `class` 和 `className` 字符串，并将结果写入 `dist/extracted-classes.txt` 文件。
 
 2.  **在宿主项目中（即使用你的 UI 组件库的项目）**：
