@@ -5,5 +5,5 @@ export interface Options {
   exclude?: FilterPattern
   output: string
   safeList?: string[]
-  fullScanFiles?: string[]
+  fullScanFiles?: FilterPattern
 }
