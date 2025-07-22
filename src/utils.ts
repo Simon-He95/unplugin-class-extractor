@@ -22,6 +22,9 @@ export function extractorAll(code: string) {
   code.replace(/(["'])(.*)\1/g, (_: string, _quote: string, classValue: string) => {
     classValue.split(/\s+/).forEach((name: string) => {
       if (name) {
+        // 过滤一些特殊字符
+        if (/^[^0-9@./"<>[\]]/.test(name))
+          return
         extractorCode.add(name)
       }
     })

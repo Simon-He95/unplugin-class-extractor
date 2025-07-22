@@ -38,6 +38,25 @@
 - 自动扫描并提取文件中的 `class` 和 `className`
 - 生成合并后的 class 字符串，方便 Tailwind CSS 进行样式扫描
 - 零配置开箱即用，支持自定义选项
+  
+### 新特性：全量字符串分割扫描（fullScanFiles）
+
+有些文件（如第三方模板、特殊业务文件）可能 class 并不在 class/className 属性中，而是以字符串形式存在。你可以通过 `fullScanFiles` 选项指定这些文件，插件会自动提取所有字符串字面量并分割为 class 进行扫描。
+
+#### 用法示例
+
+```js
+classExtractor({
+  include: ['src/**/*.{vue,jsx,tsx}'],
+  output: 'dist/extracted-classes.txt',
+  fullScanFiles: ['src/special-template.js', '**/raw-*.js'], // 这些文件会全量字符串分割
+})
+```
+
+#### 适用场景
+
+- 业务中有部分 class 以字符串变量、模板等形式存在，无法通过常规 class/className 属性提取时。
+- 需要最大化提取所有潜在 class，避免遗漏。
 
 ## 安装
 
@@ -130,6 +149,7 @@ export default defineNuxtConfig({
 | `exclude`  | `string[]`    | `['node_modules/**']` | 排除不需要处理的文件                                               |
 | `output`   | `string`      | `extracted-classes.txt` | 输出文件路径                                                       |
 | `safeList` | `string[]`    | `[]`             | 额外需要保留的 class 名称                                           |
+| `fullScanFiles` | `string[]` | `[]` | 指定需要全量字符串分割扫描的文件（glob 支持），适用于 class 以字符串形式存在的场景 |
 
 ## 典型场景
 
