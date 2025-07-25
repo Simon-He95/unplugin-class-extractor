@@ -1,7 +1,7 @@
 {
   "name": "unplugin-class-extractor",
   "type": "module",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "packageManager": "pnpm@7.33.7",
   "description": "A powerful unplugin for extracting class and className attributes from specified file types, generating a new string for Tailwind CSS style extraction.",
   "author": "Simon He",
