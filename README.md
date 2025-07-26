@@ -38,7 +38,7 @@
 - 自动扫描并提取文件中的 `class` 和 `className`
 - 生成合并后的 class 字符串，方便 Tailwind CSS 进行样式扫描
 - 零配置开箱即用，支持自定义选项
-  
+
 ### 新特性：全量字符串分割扫描（fullScanFiles）
 
 有些文件（如第三方模板、特殊业务文件）可能 class 并不在 class/className 属性中，而是以字符串形式存在。你可以通过 `fullScanFiles` 选项指定这些文件，插件会自动提取所有字符串字面量并分割为 class 进行扫描。

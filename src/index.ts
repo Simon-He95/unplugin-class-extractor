@@ -34,7 +34,8 @@ export const unpluginFactory: UnpluginFactory<Options> = (options) => {
         }
         const resolvedPath = path.resolve(process.cwd(), output) // 将相对路径解析为绝对路径
         const classString = Array.from(extractorCode).join(' ')
-        const content = `export default \`${classString}\`\nmodule.exports = exports.default;\n`
+        const content = `export const safeList = \`${classString}\`\nmodule.exports = safeList;\nexport default safeList;\n` // 拼接成 export default 字符串
+
         try {
           fs.writeFileSync(resolvedPath, content, 'utf-8') // 写入文件
           // eslint-disable-next-line no-console
