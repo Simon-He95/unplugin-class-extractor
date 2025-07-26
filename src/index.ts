@@ -33,7 +33,8 @@ export const unpluginFactory: UnpluginFactory<Options> = (options) => {
           throw new Error('Output path must be a non-empty string')
         }
         const resolvedPath = path.resolve(process.cwd(), output) // 将相对路径解析为绝对路径
-        const content = `export default \`${Array.from(extractorCode).join(' ')}\`;` // 拼接成 export default 字符串
+        const classString = Array.from(extractorCode).join(' ')
+        const content = `export default \`${classString}\`\nmodule.exports = exports.default;\n`
         try {
           fs.writeFileSync(resolvedPath, content, 'utf-8') // 写入文件
           // eslint-disable-next-line no-console
