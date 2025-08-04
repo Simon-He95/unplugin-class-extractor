@@ -175,6 +175,10 @@ export function extractorAll(code: string) {
         if (/@/.test(name) || /\.(?:com|org|net|io|dev|app|co|me|info|biz|edu|gov|mil)$/.test(name))
           return
 
+        // 过滤包含模板字符串变量插值的内容
+        if (/\$\{/.test(name))
+          return
+
         // 其他的都保留（包括 Tailwind 的各种语法）
         extractorCode.add(name)
       }
