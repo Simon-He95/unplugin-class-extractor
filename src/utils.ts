@@ -129,9 +129,53 @@ export function extractorAll(code: string) {
   code.replace(/(["'])(.*)\1/g, (_: string, _quote: string, classValue: string) => {
     classValue.split(/\s+/).forEach((name: string) => {
       if (name) {
-        // 过滤一些特殊字符
-        if (/^[0-9@./"'<>\]~]/.test(name))
+        // 过滤单个字符（包括单独的引号、空格等）
+        if (name.length <= 1)
           return
+
+        // 过滤包含空格的字符串（CSS 类名不应该包含空格）
+        if (/\s/.test(name))
+          return
+
+        // 过滤一些明显的非类名字符串
+        // 单独的引号、双引号
+        if (name === '\'' || name === '"' || name === '`')
+          return
+
+        // 包含明显的 JavaScript 关键字
+        if (/\b(?:as|import|export|from|function|return|if|else|for|while|var|let|const|null|undefined|true|false)\b/.test(name))
+          return
+
+        // 过滤一些特殊字符开头的明显非类名字符串
+        // 注意：不过滤 ! 因为它是 Tailwind 的 !important 语法
+        if (/^[0-9@./"'<>\]~:;,=+\-*%&|^`\\(){}#]/.test(name))
+          return
+
+        // 过滤 Vue 编译相关的字符串
+        if (/^(?:plugin-vue:|_[a-zA-Z]|__[a-zA-Z])/.test(name))
+          return
+
+        // 过滤常见的 HTML 标签名（单独出现时）
+        if (/^(?:div|span|p|h[1-6]|ul|ol|li|table|thead|tbody|tr|th|td|img|svg|path|circle|rect|line|br|hr|input|button|form|label|select|option|textarea|a|strong|em|del|ins|sub|sup|code|pre|blockquote|figure|figcaption|iframe|video|audio|canvas|script|style|link|meta|head|body|html|title|base|noscript)$/.test(name))
+          return
+
+        // 过滤纯数字
+        if (/^\d+$/.test(name))
+          return
+
+        // 过滤看起来像文件扩展名的字符串
+        if (/^(?:js|ts|vue|jsx|tsx|css|scss|sass|less|html|xml|json|md|txt|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|mp4|mp3|wav|pdf|zip|rar|tar|gz)$/.test(name))
+          return
+
+        // 过滤 MIME 类型
+        if (/^[a-z]+\/[a-z0-9-+.]+/.test(name))
+          return
+
+        // 过滤看起来像邮箱或域名的字符串
+        if (/@/.test(name) || /\.(?:com|org|net|io|dev|app|co|me|info|biz|edu|gov|mil)$/.test(name))
+          return
+
+        // 其他的都保留（包括 Tailwind 的各种语法）
         extractorCode.add(name)
       }
     })

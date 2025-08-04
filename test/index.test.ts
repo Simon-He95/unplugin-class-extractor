@@ -232,4 +232,27 @@ describe('extractorAll function', () => {
     expect(Array.from(extractorCode)).toContain('hover:bg-blue-600')
     expect(Array.from(extractorCode)).toContain('focus:ring-2')
   })
+
+  it('should extract Tailwind arbitrary value selectors and pseudo-classes', () => {
+    const code = `
+      const styles = "[&:hover]:bg-red-500 [&>*]:text-white [&_p]:mb-4 group-hover:opacity-50 peer-checked:text-green-500"
+      const responsive = "sm:text-lg md:text-xl lg:text-2xl dark:bg-gray-900"
+      const arbitrary = "[123px] [#ff0000] [calc(100%-2rem)] [url('/bg.jpg')] [--custom-property]"
+    `
+    extractorAll(code)
+    expect(Array.from(extractorCode)).toContain('[&:hover]:bg-red-500')
+    expect(Array.from(extractorCode)).toContain('[&>*]:text-white')
+    expect(Array.from(extractorCode)).toContain('[&_p]:mb-4')
+    expect(Array.from(extractorCode)).toContain('group-hover:opacity-50')
+    expect(Array.from(extractorCode)).toContain('peer-checked:text-green-500')
+    expect(Array.from(extractorCode)).toContain('sm:text-lg')
+    expect(Array.from(extractorCode)).toContain('md:text-xl')
+    expect(Array.from(extractorCode)).toContain('lg:text-2xl')
+    expect(Array.from(extractorCode)).toContain('dark:bg-gray-900')
+    expect(Array.from(extractorCode)).toContain('[123px]')
+    expect(Array.from(extractorCode)).toContain('[#ff0000]')
+    expect(Array.from(extractorCode)).toContain('[calc(100%-2rem)]')
+    expect(Array.from(extractorCode)).toContain('[url(\'/bg.jpg\')]')
+    expect(Array.from(extractorCode)).toContain('[--custom-property]')
+  })
 })
