@@ -143,7 +143,7 @@ export function extractorAll(code: string) {
           return
 
         // 包含明显的 JavaScript 关键字
-        if (/\b(?:as|import|export|from|function|return|if|else|for|while|var|let|const|null|undefined|true|false)\b/.test(name))
+        if (/\b(?:as|import|export|from|function|return|if|else|for|while|let|const|null|undefined|true|false)\b/.test(name))
           return
 
         // 过滤一些特殊字符开头的明显非类名字符串

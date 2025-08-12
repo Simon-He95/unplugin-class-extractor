@@ -255,4 +255,10 @@ describe('extractorAll function', () => {
     expect(Array.from(extractorCode)).toContain('[url(\'/bg.jpg\')]')
     expect(Array.from(extractorCode)).toContain('[--custom-property]')
   })
+
+  it('should extract complex Tailwind class with arbitrary values and selectors', () => {
+    const code = 'class="has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr]"'
+    extractorAll(code)
+    expect(Array.from(extractorCode)).toContain('has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr]')
+  })
 })
