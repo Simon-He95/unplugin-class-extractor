@@ -142,8 +142,9 @@ export function extractorAll(code: string) {
         if (name === '\'' || name === '"' || name === '`')
           return
 
-        // 包含明显的 JavaScript 关键字
-        if (/\b(?:as|import|export|from|function|return|if|else|for|while|let|const|null|undefined|true|false)\b/.test(name))
+        // 包含明显的 JavaScript 关键字 —— 只在整个 token 完全等于关键字时过滤
+        // 之前使用的 \b 边界会导致像 from-sky-500/90 中的 "from" 被匹配，误伤类名。
+        if (/^(?:as|import|export|from|function|return|if|else|for|while|let|const|null|undefined|true|false)$/.test(name))
           return
 
         // 过滤一些特殊字符开头的明显非类名字符串
@@ -184,7 +185,7 @@ export function extractorAll(code: string) {
           return
 
         // 过滤结尾包含特殊符号的字符串（代码片段）
-        if (/[,;"'`\\(){}[<>+=|&^%*@#]$/.test(name))
+        if (/[,;"'`\\(){}[<>+=|&^%*@#:]$/.test(name))
           return
 
         // 其他的都保留（包括 Tailwind 的各种语法）
