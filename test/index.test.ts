@@ -233,6 +233,16 @@ describe('extractorAll function', () => {
     expect(Array.from(extractorCode)).toContain('focus:ring-2')
   })
 
+  it('should filter out emoji like ℹ️ from extracted strings', () => {
+    const code = `const info = "info ℹ️"`
+    extractorAll(code)
+    const result = Array.from(extractorCode)
+    expect(result).toContain('info')
+    // ℹ and its emoji presentation should be filtered out
+    expect(result).not.toContain('ℹ')
+    expect(result).not.toContain('ℹ️')
+  })
+
   it('should extract Tailwind arbitrary value selectors and pseudo-classes', () => {
     const code = `
       const styles = "[&:hover]:bg-red-500 [&>*]:text-white [&_p]:mb-4 group-hover:opacity-50 peer-checked:text-green-500"
@@ -262,7 +272,7 @@ describe('extractorAll function', () => {
     expect(Array.from(extractorCode)).toContain('has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr]')
   })
 
-  it('special test', () => {
+  it('special test1', () => {
     const code = `import { defineComponent as _defineComponent } from "vue";
 import { unref as _unref, createElementVNode as _createElementVNode, resolveDynamicComponent as _resolveDynamicComponent, normalizeProps as _normalizeProps, guardReactiveProps as _guardReactiveProps, openBlock as _openBlock, createBlock as _createBlock, normalizeClass as _normalizeClass, mergeProps as _mergeProps, createCommentVNode as _createCommentVNode, createElementBlock as _createElementBlock, toDisplayString as _toDisplayString, createTextVNode as _createTextVNode, normalizeStyle as _normalizeStyle, withModifiers as _withModifiers, Transition as _Transition, withCtx as _withCtx, createVNode as _createVNode, Teleport as _Teleport } from "vue";
 const _hoisted_1 = { class: "my-4 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm bg-white dark:bg-gray-900" };
@@ -1618,6 +1628,65 @@ export default /* @__PURE__ */ _defineComponent({
         "bg-black/70",
         "self",
         "modalContent",
+      ]
+    `)
+  })
+
+  it('special test2', () => {
+    const code = `import { defineComponent as _defineComponent } from "vue";
+import { toDisplayString as _toDisplayString, openBlock as _openBlock, createElementBlock as _createElementBlock, createCommentVNode as _createCommentVNode, createElementVNode as _createElementVNode, unref as _unref, createVNode as _createVNode, normalizeClass as _normalizeClass } from "vue";
+const _hoisted_1 = { class: "admonition-header" };
+const _hoisted_2 = {
+  key: 0,
+  class: "admonition-icon"
+};
+const _hoisted_3 = { class: "admonition-title" };
+const _hoisted_4 = { class: "admonition-content" };
+import NodeRenderer from "../NodeRenderer";
+export default /* @__PURE__ */ _defineComponent({
+  __name: "AdmonitionNode",
+  props: {
+    node: {}
+  },
+  emits: ["copy"],
+  setup(__props) {
+    const iconMap = {
+      note: "ℹ️",
+      info: "ℹ️",
+      tip: "💡",
+      warning: "⚠️",
+      danger: "❗",
+      caution: "⚠️"
+    };
+    return (_ctx, _cache) => {
+      return _openBlock(), _createElementBlock("div", {
+        class: _normalizeClass(["admonition", \`admonition-\${ _ctx.node.kind } \`])
+      }, [
+        _createElementVNode("div", _hoisted_1, [
+          iconMap[_ctx.node.kind] ? (_openBlock(), _createElementBlock("span", _hoisted_2, _toDisplayString(iconMap[_ctx.node.kind]), 1)) : _createCommentVNode("", true),
+          _createElementVNode("span", _hoisted_3, _toDisplayString(_ctx.node.title), 1)
+        ]),
+        _createElementVNode("div", _hoisted_4, [
+          _createVNode(_unref(NodeRenderer), {
+            nodes: _ctx.node.children,
+            onCopy: _cache[0] || (_cache[0] = ($event) => _ctx.$emit("copy", $event))
+          }, null, 8, ["nodes"])
+        ])
+      ], 2);
+    };
+  }
+});`
+    extractorAll(code)
+    expect(Array.from(extractorCode)).toMatchInlineSnapshot(`
+      [
+        "admonition-header",
+        "admonition-icon",
+        "admonition-title",
+        "admonition-content",
+        "AdmonitionNode",
+        "copy",
+        "admonition",
+        "nodes",
       ]
     `)
   })

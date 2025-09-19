@@ -180,14 +180,15 @@ export function extractorAll(code: string) {
         if (/\$\{/.test(name))
           return
 
-        // 过滤包含emoji表情的内容
-        if (/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/u.test(name))
+        // 过滤包含 emoji 表情的内容
+        // 包括常见的 Emoji 区间以及某些符号（例如 U+2139 INFORMATION SOURCE ℹ️），
+        // 并允许跟随可选的变体选择符 U+FE0F
+        if (/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{2139}]\u{FE0F}?/u.test(name))
           return
 
         // 过滤结尾包含特殊符号的字符串（代码片段）
-        if (/[,;"'`\\(){}[<>+=|&^%*@#:]$/.test(name))
+        if (/[,;"'`\\(){}[<>+=|&^%*@#:.]$/.test(name))
           return
-
         // 其他的都保留（包括 Tailwind 的各种语法）
         extractorCode.add(name)
       }
