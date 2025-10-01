@@ -129,68 +129,82 @@ export function extractorAll(code: string) {
   code.replace(/(["'])(.*)\1/g, (_: string, _quote: string, classValue: string) => {
     classValue.split(/\s+/).forEach((name: string) => {
       if (name) {
+        // 支持开头为 ! 的 Tailwind 重要符号（例如 !px-0）。
+        // 在做一系列验证时使用去掉开头 ! 的 "bare" 版本，但最终仍把原始 name（含 !）写入集合中。
+        const originalName = name.replace(/,$/, '').replace(/^"|"$/g, '')
+        const bare = originalName.replace(/^!+/, '')
+
         // 过滤单个字符（包括单独的引号、空格等）
-        if (name.length <= 1)
+        if (bare.includes('[') && !bare.includes(']'))
+          return
+
+        if (bare.length <= 1)
+          return
+
+        if (name.startsWith('=') || (/[A-Z]/i.test(bare[0]) && bare[0] === bare[0].toUpperCase()))
           return
 
         // 过滤包含空格的字符串（CSS 类名不应该包含空格）
-        if (/\s/.test(name))
+        if (/\s/.test(bare))
           return
 
         // 过滤一些明显的非类名字符串
         // 单独的引号、双引号
-        if (name === '\'' || name === '"' || name === '`')
+        if (bare === '\'' || bare === '"' || bare === '`')
           return
 
         // 包含明显的 JavaScript 关键字 —— 只在整个 token 完全等于关键字时过滤
         // 之前使用的 \b 边界会导致像 from-sky-500/90 中的 "from" 被匹配，误伤类名。
-        if (/^(?:as|import|export|from|function|return|if|else|for|while|let|const|null|undefined|true|false)$/.test(name))
+        if (/^(?:as|import|export|from|function|return|if|else|for|while|let|const|null|undefined|true|false)$/.test(bare))
           return
-
         // 过滤一些特殊字符开头的明显非类名字符串
         // 注意：不过滤 ! 因为它是 Tailwind 的 !important 语法
-        if (/^[0-9@./"'<>\]~:;,=+\-*%&|^`\\(){}#]/.test(name))
+        if (/^[0-9@./"'<>\]~:;,=+\-*%&|^`\\(){}#]/.test(bare))
           return
 
         // 过滤 Vue 编译相关的字符串
-        if (/^(?:plugin-vue:|_[a-zA-Z]|__[a-zA-Z])/.test(name))
+        if (/^(?:plugin-vue:|_[a-zA-Z]|__[a-zA-Z])/.test(bare))
           return
 
         // 过滤常见的 HTML 标签名（单独出现时）
-        if (/^(?:div|span|p|h[1-6]|ul|ol|li|table|thead|tbody|tr|th|td|img|svg|path|circle|rect|line|br|hr|input|button|form|label|select|option|textarea|a|strong|em|del|ins|sub|sup|code|pre|blockquote|figure|figcaption|iframe|video|audio|canvas|script|style|link|meta|head|body|html|title|base|noscript)$/.test(name))
+        if (/^(?:div|span|p|h[1-6]|ul|ol|li|table|thead|tbody|tr|th|td|img|svg|path|circle|rect|line|br|hr|input|button|form|label|select|option|textarea|a|strong|em|del|ins|sub|sup|code|pre|blockquote|figure|figcaption|iframe|video|audio|canvas|script|style|link|meta|head|body|html|title|base|noscript)$/.test(bare))
           return
 
         // 过滤纯数字
-        if (/^\d+$/.test(name))
+        if (/^\d+$/.test(bare))
           return
 
         // 过滤看起来像文件扩展名的字符串
-        if (/^(?:js|ts|vue|jsx|tsx|css|scss|sass|less|html|xml|json|md|txt|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|mp4|mp3|wav|pdf|zip|rar|tar|gz)$/.test(name))
+        if (/^(?:js|ts|vue|jsx|tsx|css|scss|sass|less|html|xml|json|md|txt|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|mp4|mp3|wav|pdf|zip|rar|tar|gz)$/.test(bare))
           return
 
         // 过滤 MIME 类型
-        if (/^[a-z]+\/[a-z0-9-+.]+/.test(name))
+        if (/^[a-z]+\/[a-z0-9-+.]+/.test(bare))
           return
 
         // 过滤看起来像邮箱或域名的字符串
-        if (/@/.test(name) || /\.(?:com|org|net|io|dev|app|co|me|info|biz|edu|gov|mil)$/.test(name))
+        if (/@/.test(bare) || /\.(?:com|org|net|io|dev|app|co|me|info|biz|edu|gov|mil)$/.test(bare))
           return
 
         // 过滤包含模板字符串变量插值的内容
-        if (/\$\{/.test(name))
+        if (/\$\{/.test(bare))
           return
 
         // 过滤包含 emoji 表情的内容
         // 包括常见的 Emoji 区间以及某些符号（例如 U+2139 INFORMATION SOURCE ℹ️），
         // 并允许跟随可选的变体选择符 U+FE0F
-        if (/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{2139}]\u{FE0F}?/u.test(name))
+        if (/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{2139}]\u{FE0F}?/u.test(bare))
           return
 
         // 过滤结尾包含特殊符号的字符串（代码片段）
-        if (/[,;"'`\\(){}[<>+=|&^%*@#:.]$/.test(name))
+        // 但允许 Tailwind 的 arbitrary value 语法，例如 p-[calc(4/7*1em)]
+        // 先检测是否以特殊符号结尾（不包括 `[`），再排除像 prefix-[...] 这样的合法任意值语法
+        const endsWithSpecialChar = /[,;"'`\\(){}<>+=|&^%*@#:.]$/.test(bare)
+        const arbitraryBracketPattern = /^[^\s[\]]+\[[^\]]+\]$/.test(bare)
+        if (endsWithSpecialChar && !arbitraryBracketPattern)
           return
         // 其他的都保留（包括 Tailwind 的各种语法）
-        extractorCode.add(name)
+        extractorCode.add(originalName)
       }
     })
     return _

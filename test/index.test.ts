@@ -181,7 +181,6 @@ describe('extractorAll function', () => {
       const config = { theme: "dark-mode rounded-lg" }
     `
     extractorAll(code)
-    expect(Array.from(extractorCode)).toContain('Hello')
     expect(Array.from(extractorCode)).toContain('world')
     expect(Array.from(extractorCode)).toContain('flex')
     expect(Array.from(extractorCode)).toContain('items-center')
@@ -1533,7 +1532,6 @@ export default /* @__PURE__ */ _defineComponent({
         "ring-1",
         "ring-white/20",
         "backdrop-blur-sm",
-        "Rendering",
         "in",
         "progress",
         "dialog-panel",
@@ -1546,23 +1544,22 @@ export default /* @__PURE__ */ _defineComponent({
         "top-6",
         "right-6",
         "z-50",
-        "MermaidBlockNode",
         "copy",
         "loose",
+        "object",
+        "value",
+        "dark",
+        "default",
         "abort",
-        "Operation",
         "timed",
         "out",
         "text-red-500",
-        "Failed",
         "to",
         "render",
-        "Unknown",
         "error",
         "module",
-        "Worker",
-        "Parser",
         "worker",
+        "unavailable",
         "will",
         "fall",
         "back",
@@ -1571,14 +1568,11 @@ export default /* @__PURE__ */ _defineComponent({
         "available",
         "call",
         "canParse",
-        "AbortError",
         "findPrefix",
         "viewBox",
         "width",
         "height",
         "get",
-        "SVG",
-        "Escape",
         "hidden",
         "keydown",
         "fullscreen",
@@ -1589,9 +1583,9 @@ export default /* @__PURE__ */ _defineComponent({
         "source",
         "ease",
         "transitionend",
-        "Mermaid",
         "container",
         "ready",
+        "light",
         "mermaid",
         "w-4",
         "h-4",
@@ -1602,16 +1596,29 @@ export default /* @__PURE__ */ _defineComponent({
         "transition-colors",
         "dark:bg-gray-600",
         "dark:text-gray-200",
+        "text-gray-500",
         "hover:text-gray-700",
         "dark:hover:text-gray-200",
+        "lucide:eye",
+        "lucide:code",
         "mermaid-action-btn",
         "p-2",
         "hover:bg-gray-200",
         "dark:hover:bg-gray-700",
+        "lucide:copy",
+        "lucide:check",
         "isFullscreenDisabled.value",
+        "opacity-50",
+        "cursor-not-allowed",
+        "lucide:download",
         "isModalOpen.value",
+        "lucide:minimize-2",
+        "lucide:maximize-2",
         "modeContainerRef",
+        "lucide:loader-2",
         "animate-spin",
+        "lucide:zoom-in",
+        "lucide:zoom-out",
         "mermaidContainer",
         "min-h-[360px]",
         "transition-all",
@@ -1619,6 +1626,8 @@ export default /* @__PURE__ */ _defineComponent({
         "block",
         "mermaidWrapper",
         "inset-0",
+        "cursor-grab",
+        "cursor-grabbing",
         "mermaidContent",
         "text-center",
         "justify-center",
@@ -1627,6 +1636,7 @@ export default /* @__PURE__ */ _defineComponent({
         "fixed",
         "bg-black/70",
         "self",
+        "lucide:x",
         "modalContent",
       ]
     `)
@@ -1683,9 +1693,108 @@ export default /* @__PURE__ */ _defineComponent({
         "admonition-icon",
         "admonition-title",
         "admonition-content",
-        "AdmonitionNode",
         "copy",
         "admonition",
+        "nodes",
+      ]
+    `)
+  })
+
+  it('special test3', () => {
+    const code = `import { defineComponent as _defineComponent } from "vue";
+import { renderList as _renderList, Fragment as _Fragment, openBlock as _openBlock, createElementBlock as _createElementBlock, normalizeStyle as _normalizeStyle, createElementVNode as _createElementVNode, unref as _unref, createVNode as _createVNode, normalizeClass as _normalizeClass } from "vue";
+const _hoisted_1 = { class: "table-node table-auto text-left my-8 text-sm w-full" };
+const _hoisted_2 = { class: "border-b" };
+import { computed } from "vue";
+import NodeRenderer from "../NodeRenderer";
+export default /* @__PURE__ */ _defineComponent({
+  __name: "TableNode",
+  props: {
+    node: {}
+  },
+  emits: ["copy"],
+  setup(__props) {
+    const colCount = computed(() => __props.node?.header?.cells?.length ?? 0);
+    const colWidths = computed(() => {
+      const n = colCount.value || 1;
+      const base = Math.floor(100 / n);
+      return Array.from({ length: n }).map(
+        (_, i) => i === n - 1 ? \`\${100 - base * (n - 1)}%\` : \`\${base}%\`
+      );
+    });
+    return (_ctx, _cache) => {
+      return _openBlock(), _createElementBlock("table", _hoisted_1, [
+        _createElementVNode("colgroup", null, [
+          (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(colWidths.value, (w, i) => {
+            return _openBlock(), _createElementBlock("col", {
+              key: \`col-\${i}\`,
+              style: _normalizeStyle({ width: w })
+            }, null, 4);
+          }), 128))
+        ]),
+        _createElementVNode("thead", null, [
+          _createElementVNode("tr", _hoisted_2, [
+            (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(__props.node.header.cells, (cell, index) => {
+              return _openBlock(), _createElementBlock("th", {
+                key: \`header-\${index}\`,
+                dir: "auto",
+                class: _normalizeClass(["text-left font-semibold dark:border-zinc-800 dark:text-white truncate p-[calc(4/7*1em)]", [index === 0 ? "!pl-0" : ""]])
+              }, [
+                _createVNode(_unref(NodeRenderer), {
+                  nodes: cell.children,
+                  onCopy: _cache[0] || (_cache[0] = ($event) => _ctx.$emit("copy", $event))
+                }, null, 8, ["nodes"])
+              ], 2);
+            }), 128))
+          ])
+        ]),
+        _createElementVNode("tbody", null, [
+          (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(__props.node.rows, (row, rowIndex) => {
+            return _openBlock(), _createElementBlock("tr", {
+              key: \`row-\${rowIndex}\`,
+              class: _normalizeClass([
+                rowIndex < __props.node.rows.length - 1 ? "border-b dark:border-zinc-800" : ""
+              ])
+            }, [
+              (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(row.cells, (cell, cellIndex) => {
+                return _openBlock(), _createElementBlock("td", {
+                  key: \`cell-\${rowIndex}-\${cellIndex}\`,
+                  class: _normalizeClass(["text-left truncate p-[calc(4/7*1em)]", [cellIndex === 0 ? "!pl-0" : ""]]),
+                  dir: "auto"
+                }, [
+                  _createVNode(_unref(NodeRenderer), {
+                    nodes: cell.children,
+                    onCopy: _cache[1] || (_cache[1] = ($event) => _ctx.$emit("copy", $event))
+                  }, null, 8, ["nodes"])
+                ], 2);
+              }), 128))
+            ], 2);
+          }), 128))
+        ])
+      ]);
+    };
+  }
+});`
+    extractorAll(code)
+    expect(Array.from(extractorCode)).toMatchInlineSnapshot(`
+      [
+        "table-node",
+        "table-auto",
+        "text-left",
+        "my-8",
+        "text-sm",
+        "w-full",
+        "border-b",
+        "copy",
+        "colgroup",
+        "col",
+        "auto",
+        "font-semibold",
+        "dark:border-zinc-800",
+        "dark:text-white",
+        "truncate",
+        "p-[calc(4/7*1em)]",
+        "!pl-0",
         "nodes",
       ]
     `)
