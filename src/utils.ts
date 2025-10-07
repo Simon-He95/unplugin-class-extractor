@@ -203,6 +203,31 @@ export function extractorAll(code: string) {
         const arbitraryBracketPattern = /^[^\s[\]]+\[[^\]]+\]$/.test(bare)
         if (endsWithSpecialChar && !arbitraryBracketPattern)
           return
+        // 额外启发式过滤：排除明显不是 Tailwind 类名的 token
+
+        // 1) URL / 协议 / 邮箱 等
+        if (bare.includes('://') || bare.includes('http') || bare.startsWith('www.') || /@/.test(bare))
+          return
+
+        // 2) Vue 的编译标记或作用域 id（data-v-...）
+        if (/\bdata-v-[0-9a-fA-F]+\b/.test(bare) || bare.startsWith('data-v-'))
+          return
+
+        // 4) 含有圆括号的（如 translate3d(0px）且不是在方括号内的 arbitrary value，通常不是类名
+        // 允许 prefix-[calc(...)] 这种形式，通过检测 arbitraryBracketPattern 来判断
+        // 如果 token 中包含任意方括号片段（例如 [calc(...)]），则允许其中包含圆括号
+        const hasBracketed = /\[[^\]]+\]/.test(bare)
+        if (/[()]/.test(bare) && !hasBracketed)
+          return
+
+        // 4) 过长的 token（防止把整段文本或句子当成一个类名），阈值可调整
+        if (bare.length > 80)
+          return
+
+        // 5) 含有明显的域名后缀（.com/.io 等）或以点号结尾的碎片
+        if (/\.(?:com|org|net|io|dev|app|co|me|info|biz|edu|gov|mil)\b/i.test(bare) || /\.$/.test(bare))
+          return
+
         // 其他的都保留（包括 Tailwind 的各种语法）
         extractorCode.add(originalName)
       }
