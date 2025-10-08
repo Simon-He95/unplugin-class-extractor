@@ -126,6 +126,19 @@ export function extractor(code: string) {
 
 export function extractorAll(code: string) {
   // 提取所有 '"([^"]*)"' 之间的内容
+  // helper: 检查方括号是否不合法（未闭合或顺序错误）
+  function hasInvalidBrackets(token: string) {
+    const firstOpenIdx = token.indexOf('[')
+    const firstCloseIdx = token.indexOf(']')
+    // 如果存在 `[` 但后面没有对应的 `]`
+    if (firstOpenIdx !== -1 && !/\]/.test(token.slice(firstOpenIdx)))
+      return true
+    // 如果存在 `]` 且它在第一个 `[` 之前，视为顺序错误
+    if (firstCloseIdx !== -1 && firstOpenIdx !== -1 && firstCloseIdx < firstOpenIdx)
+      return true
+    return false
+  }
+
   code.replace(/(["'])(.*)\1/g, (_: string, _quote: string, classValue: string) => {
     classValue.split(/\s+/).forEach((name: string) => {
       if (name) {
@@ -134,8 +147,14 @@ export function extractorAll(code: string) {
         const originalName = name.replace(/,$/, '').replace(/^"|"$/g, '')
         const bare = originalName.replace(/^!+/, '')
 
+        if (bare.startsWith('props.') || bare.endsWith('.value') || bare.startsWith('lucide:'))
+          return
+
         // 过滤单个字符（包括单独的引号、空格等）
-        if (bare.includes('[') && !bare.includes(']'))
+        // 严格检测不成对的方括号或顺序错误的方括号（例如 "]xxx[")
+        // - 如果存在一个 `[` 但后面没有对应的 `]`，则视为不合法
+        // - 如果存在 `]` 且其位置在 `[` 之前，视为顺序错误
+        if (hasInvalidBrackets(bare))
           return
 
         if (bare.length <= 1)
